@@ -3,6 +3,7 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const routes = require('../server/routes');
 const loadModel = require('../services/loadModel');
+const InputError = require('../exceptions/InputError');
  
 (async () => {
     const server = Hapi.server({
@@ -23,21 +24,21 @@ const loadModel = require('../services/loadModel');
     server.ext('onPreResponse', function (request, h) {
         const response = request.response;
  
-        // if (response instanceof InputError) {
-        //     const newResponse = h.response({
-        //         status: 'fail',
-        //         message: `${response.message} Silakan gunakan foto lain.`
-        //     })
-        //     newResponse.code(response.statusCode)
-        //     return newResponse;
-        // }
+        if (response instanceof InputError) {
+            const newResponse = h.response({
+                status: 'fail',
+                message: `${response.message} Silakan gunakan foto lain.`
+            });
+            newResponse.code(response.output.statusCode);
+            return newResponse;
+        }
  
         if (response.isBoom) {
             const newResponse = h.response({
                 status: 'fail',
                 message: response.message
-            })
-            newResponse.code(response.statusCode);
+            });
+            newResponse.code(response.output.statusCode);
             return newResponse;
         }
  
@@ -45,5 +46,5 @@ const loadModel = require('../services/loadModel');
     });
  
     await server.start();
-    console.log(`Server start at: ${server.info.uri}`);
+    console.log('Server running on %s', server.info.uri);
 })();

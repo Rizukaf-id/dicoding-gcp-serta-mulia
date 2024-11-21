@@ -6,3 +6,5 @@
 
 # Ignore datatest-serta-mulia directory
 /datatest-serta-mulia
+
+package-lock.json
